@@ -1,0 +1,110 @@
+package main
+
+import "core:encoding/json"
+import "core:fmt"
+import "core:os"
+import "core:path/filepath"
+import "core:strings"
+import "vendor:raylib"
+
+MapChunk :: struct {
+	width:  i32,
+	height: i32,
+	x:      i32,
+	y:      i32,
+	data:   [dynamic]u16,
+}
+
+MapLayer :: struct {
+	chunks: [dynamic]MapChunk,
+}
+
+TileSet :: struct {
+	columns:    i32,
+	firstgid:   i32,
+	image:      string,
+	tilewidth:  i32,
+	tileheight: i32,
+	tilecount:  i32,
+}
+
+RenderTile :: struct {
+	texture: raylib.Texture2D,
+	x:       i32,
+	y:       i32,
+}
+
+TileMap :: struct {
+	layers:     [dynamic]MapLayer,
+	tilesets:   [dynamic]TileSet,
+	tiles:      [dynamic]RenderTile,
+	tilewidth:  i16,
+	tileheight: i16,
+}
+
+loadMap :: proc(filename: string) -> TileMap {
+	defer free_all(context.temp_allocator)
+
+	folder := filepath.dir(filename)
+
+	raw_data, err := os.read_entire_file(filename, context.temp_allocator)
+	if err != nil do panic(fmt.aprintf("Could not load map from %s - %s", filename, err))
+
+	mappe := TileMap{}
+	json.unmarshal(raw_data, &mappe) // no temp_allocator, because we need this later
+
+	max_idx: i32 = 0
+	for set in mappe.tilesets {
+		max_idx = max(max_idx, set.firstgid + set.tilecount)
+	}
+	mappe.tiles = make([dynamic]RenderTile, max_idx + 1)
+	for set in mappe.tilesets {
+		image_path, _ := filepath.join({folder, set.image}, context.temp_allocator)
+		image_cstring := strings.clone_to_cstring(image_path, context.temp_allocator)
+
+		tex := raylib.LoadTexture(image_cstring)
+		for i in 0 ..< set.tilecount {
+			x := (i % set.columns) * set.tilewidth
+			y := (i / set.columns) * set.tileheight
+			idx := set.firstgid + i
+			mappe.tiles[idx] = {tex, x, y}
+		}
+	}
+	return mappe
+}
+
+
+drawTileMap :: proc(m: TileMap, gs: GameState) {
+	white := raylib.Color{255, 255, 255, 255}
+	make_rect :: proc(x, y: i32, w, h: i16) -> raylib.Rectangle {
+		return {f32(x), f32(y), f32(w), f32(h)}
+	}
+
+	shift := gs.camera.origin
+	scale := gs.camera.scale
+	for layer in m.layers {
+		for c in layer.chunks {
+			for i in 0 ..< (c.width * c.height) {
+				tile_idx := c.data[i]
+				if tile_idx == 0 do continue
+
+				pos := [2]i32 {
+					i32(m.tilewidth) * (i % c.width) + (c.x * i32(m.tilewidth)),
+					i32(m.tileheight) * (i / c.width) + (c.y * i32(m.tileheight)),
+				}
+				pos *= scale
+				pos -= shift
+
+				tile := m.tiles[tile_idx]
+				raylib.DrawTexturePro(
+					tile.texture,
+					make_rect(tile.x, tile.y, m.tilewidth, m.tileheight),
+					make_rect(pos.x, pos.y, m.tilewidth * i16(scale), m.tileheight * i16(scale)),
+					raylib.Vector2{},
+					0.0,
+					white,
+				)
+			}
+		}
+	}
+}
