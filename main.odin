@@ -2,6 +2,7 @@
 
 package main
 
+import "core:fmt"
 import "vendor:raylib"
 
 Camera :: struct {
@@ -17,7 +18,7 @@ GameState :: struct {
 main :: proc() {
 	raylib.SetConfigFlags({.VSYNC_HINT, .WINDOW_RESIZABLE})
 	raylib.InitWindow(800, 600, "Odin J&N")
-	gs := GameState{{{800, 600}, {0, 0}, 4}}
+	gs := GameState{{{800, 600}, {0, 0}, 2}}
 
 	bg := loadDefaultBackground()
 
@@ -26,8 +27,12 @@ main :: proc() {
 	for !raylib.WindowShouldClose() {
 		raylib.PollInputEvents()
 
-		if raylib.IsWindowResized() {
-			gs.camera.size = {raylib.GetRenderWidth(), raylib.GetRenderHeight()}
+		if gs.camera.size.x != raylib.GetRenderWidth() ||
+		   gs.camera.size.y != raylib.GetRenderHeight() {
+			new_size := [2]i32{raylib.GetRenderWidth(), raylib.GetRenderHeight()}
+			delta := new_size - gs.camera.size
+			gs.camera.size = new_size
+			gs.camera.origin -= delta / 2
 		}
 
 		cam := &gs.camera
