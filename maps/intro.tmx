@@ -12,6 +12,15 @@
  <tileset firstgid="205" name="Tree1" tilewidth="32" tileheight="32" tilecount="48" columns="8">
   <image source="../assets/gh_platform/Tree1.png" width="256" height="208"/>
  </tileset>
+ <tileset firstgid="253" name="Tree2" tilewidth="32" tileheight="32" tilecount="48" columns="8">
+  <image source="../assets/gh_platform/Tree2.png" width="256" height="208"/>
+ </tileset>
+ <tileset firstgid="301" name="Garden Decorations" tilewidth="32" tileheight="32" tilecount="28" columns="7">
+  <image source="../assets/gh_platform/Garden Decorations.png" width="224" height="128"/>
+ </tileset>
+ <tileset firstgid="329" name="Decor" tilewidth="32" tileheight="32" tilecount="221" columns="13">
+  <image source="../assets/gh_platform/Decor.png" width="416" height="544"/>
+ </tileset>
  <layer id="2" name="Background" width="30" height="20">
   <data encoding="csv">
    <chunk x="-16" y="0" width="16" height="16">
@@ -24,10 +33,10 @@
 0,0,0,0,0,0,0,0,0,0,0,0,177,178,179,180,
 0,0,0,0,0,0,0,0,0,0,0,0,184,185,186,187,
 0,0,0,0,0,0,0,0,0,0,0,0,191,192,193,194,
-0,0,0,0,0,0,0,0,0,0,0,0,198,199,200,201,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,305,0,0,0,198,199,200,201,
+0,0,0,0,0,0,0,0,312,0,0,0,0,0,0,0,
+0,317,0,342,343,344,0,0,319,0,0,0,0,0,0,0,
+0,324,0,355,356,357,0,0,326,0,0,0,308,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
