@@ -25,16 +25,14 @@ main :: proc() {
 	game_map := loadMap("maps/intro.tmj")
 
 	for !raylib.WindowShouldClose() {
-		raylib.PollInputEvents()
-
-		if gs.camera.size.x != raylib.GetRenderWidth() ||
-		   gs.camera.size.y != raylib.GetRenderHeight() {
+		if raylib.IsWindowResized() {
 			new_size := [2]i32{raylib.GetRenderWidth(), raylib.GetRenderHeight()}
 			delta := new_size - gs.camera.size
 			gs.camera.size = new_size
 			gs.camera.origin -= delta / 2
 		}
 
+		raylib.PollInputEvents()
 		cam := &gs.camera
 		if raylib.IsKeyDown(.LEFT) {
 			cam.origin.x -= 5
