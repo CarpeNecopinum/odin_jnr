@@ -15,108 +15,6 @@ GameState :: struct {
 	camera: Camera,
 }
 
-Facing :: enum {
-	LEFT  = 0,
-	RIGHT = 1,
-}
-
-CharacterState :: enum {
-	IDLE,
-	WALKING,
-	// RUNNING,
-	// FLYING,
-	// JUMPING,
-	// HITTING,
-	// DYING,
-}
-
-Animation :: struct {
-	y:          i32,
-	frame_size: [2]i32,
-	num_frames: i32,
-}
-
-Player :: struct {
-	pos:           [2]i32,
-	texture:       raylib.Texture,
-	facing:        Facing,
-	state:         CharacterState,
-	animations:    [CharacterState]Animation,
-	frame_idx:     i32,
-	frame_divisor: i32,
-}
-
-makePlayer :: proc() -> Player {
-	return {
-		{0, 0},
-		raylib.LoadTexture("assets/gh_chars/Character skin colors/Female Skin1.png"),
-		.LEFT,
-		.IDLE,
-		{.IDLE = {0, {80, 64}, 5}, .WALKING = {64, {80, 64}, 8}},
-		0,
-		6,
-	}
-}
-
-updatePlayer :: proc(p: ^Player) {
-	p.frame_idx += 1
-
-	moved := false
-	if raylib.IsKeyDown(.LEFT) {
-		p.pos.x -= 2
-		p.facing = .LEFT
-		moved = true
-	} else if raylib.IsKeyDown(.RIGHT) {
-		p.pos.x += 2
-		p.facing = .RIGHT
-		moved = true
-	}
-
-	if moved {
-		p.state = .WALKING
-	} else {
-		p.state = .IDLE
-	}
-
-	// if raylib.IsKeyDown(.UP) {
-	// 	cam.origin.y -= 5
-	// } else if raylib.IsKeyDown(.DOWN) {
-	// 	cam.origin.y += 5
-	// }
-
-
-}
-
-drawPlayer :: proc(p: Player, gs: GameState) {
-	make_rect :: proc(pos: [2]i32, size: [2]i32) -> raylib.Rectangle {
-		return {f32(pos.x), f32(pos.y), f32(size.x), f32(size.y)}
-	}
-
-	anim := p.animations[p.state]
-	frame_idx := (p.frame_idx / p.frame_divisor) % anim.num_frames
-	src_pos := [2]i32{frame_idx * anim.frame_size.x, anim.y}
-	src := make_rect(src_pos, anim.frame_size)
-	dst := make_rect(p.pos * gs.camera.scale, anim.frame_size * gs.camera.scale)
-	if p.facing == .RIGHT {
-		src.width = -src.width
-	}
-	raylib.DrawTexturePro(
-		p.texture,
-		src,
-		dst,
-		([2]f32)(gs.camera.origin),
-		0,
-		raylib.Color{255, 255, 255, 255},
-	)
-}
-
-focusPlayer :: proc(c: ^Camera, p: Player) {
-	ff :: [2]f32
-	ii :: [2]i32
-
-	goal := (p.pos * c.scale) - c.size / 2 + p.animations[.IDLE].frame_size * c.scale / 2
-	c.origin = ii(0.9 * ff(c.origin) + 0.1 * ff(goal))
-}
 
 main :: proc() {
 	raylib.SetConfigFlags({.VSYNC_HINT, .WINDOW_RESIZABLE})
@@ -145,12 +43,12 @@ main :: proc() {
 
 
 		updatePlayer(&p)
-		focusPlayer(&gs.camera, p)
+		focusCharacter(&gs.camera, p)
 
 		raylib.BeginDrawing()
 		drawBackground(bg, gs)
 		drawTileMap(game_map, gs)
-		drawPlayer(p, gs)
+		drawCharacter(p, gs)
 		raylib.EndDrawing()
 	}
 	raylib.CloseWindow()
