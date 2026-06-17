@@ -15,8 +15,21 @@ MapChunk :: struct {
 	data:   [dynamic]u16,
 }
 
+MapObject :: struct {
+	id:   i32,
+	name: string,
+	x, y: i32,
+}
+
+LayerType :: enum {
+	objectgroup,
+	tilelayer,
+}
+
 MapLayer :: struct {
-	chunks: [dynamic]MapChunk,
+	type:    LayerType,
+	chunks:  [dynamic]MapChunk,
+	objects: [dynamic]MapObject,
 }
 
 TileSet :: struct {
@@ -83,6 +96,7 @@ drawTileMap :: proc(m: TileMap, gs: GameState) {
 	shift := gs.camera.origin
 	scale := gs.camera.scale
 	for layer in m.layers {
+		if layer.type != .tilelayer do continue
 		for c in layer.chunks {
 			for i in 0 ..< (c.width * c.height) {
 				tile_idx := c.data[i]
@@ -107,4 +121,14 @@ drawTileMap :: proc(m: TileMap, gs: GameState) {
 			}
 		}
 	}
+}
+
+findMapObject :: proc(m: TileMap, name: string) -> ^MapObject {
+	for l in m.layers {
+		if l.type != .objectgroup do continue
+		for &o in l.objects {
+			if o.name == name do return &o
+		}
+	}
+	return nil
 }
