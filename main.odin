@@ -60,6 +60,31 @@ makePlayer :: proc() -> Player {
 
 updatePlayer :: proc(p: ^Player) {
 	p.frame_idx += 1
+
+	moved := false
+	if raylib.IsKeyDown(.LEFT) {
+		p.pos.x -= 2
+		p.facing = .LEFT
+		moved = true
+	} else if raylib.IsKeyDown(.RIGHT) {
+		p.pos.x += 2
+		p.facing = .RIGHT
+		moved = true
+	}
+
+	if moved {
+		p.state = .WALKING
+	} else {
+		p.state = .IDLE
+	}
+
+	// if raylib.IsKeyDown(.UP) {
+	// 	cam.origin.y -= 5
+	// } else if raylib.IsKeyDown(.DOWN) {
+	// 	cam.origin.y += 5
+	// }
+
+
 }
 
 drawPlayer :: proc(p: Player, gs: GameState) {
@@ -69,15 +94,28 @@ drawPlayer :: proc(p: Player, gs: GameState) {
 
 	anim := p.animations[p.state]
 	frame_idx := (p.frame_idx / p.frame_divisor) % anim.num_frames
-	src := [2]i32{frame_idx * anim.frame_size.x, anim.y}
+	src_pos := [2]i32{frame_idx * anim.frame_size.x, anim.y}
+	src := make_rect(src_pos, anim.frame_size)
+	dst := make_rect(p.pos * gs.camera.scale, anim.frame_size * gs.camera.scale)
+	if p.facing == .RIGHT {
+		src.width = -src.width
+	}
 	raylib.DrawTexturePro(
 		p.texture,
-		make_rect(src, anim.frame_size),
-		make_rect(p.pos * gs.camera.scale, anim.frame_size * gs.camera.scale),
+		src,
+		dst,
 		([2]f32)(gs.camera.origin),
 		0,
 		raylib.Color{255, 255, 255, 255},
 	)
+}
+
+focusPlayer :: proc(c: ^Camera, p: Player) {
+	ff :: [2]f32
+	ii :: [2]i32
+
+	goal := (p.pos * c.scale) - c.size / 2 + p.animations[.IDLE].frame_size * c.scale / 2
+	c.origin = ii(0.9 * ff(c.origin) + 0.1 * ff(goal))
 }
 
 main :: proc() {
@@ -104,20 +142,10 @@ main :: proc() {
 		}
 
 		raylib.PollInputEvents()
-		cam := &gs.camera
-		if raylib.IsKeyDown(.LEFT) {
-			cam.origin.x -= 5
-		} else if raylib.IsKeyDown(.RIGHT) {
-			cam.origin.x += 5
-		}
 
-		if raylib.IsKeyDown(.UP) {
-			cam.origin.y -= 5
-		} else if raylib.IsKeyDown(.DOWN) {
-			cam.origin.y += 5
-		}
 
 		updatePlayer(&p)
+		focusPlayer(&gs.camera, p)
 
 		raylib.BeginDrawing()
 		drawBackground(bg, gs)
