@@ -38,6 +38,7 @@ makePlayer :: proc() -> Character {
 		"assets/gh_chars/Female Clothing/Socks.png",
 		"assets/gh_chars/Female Clothing/Skirt.png",
 		"assets/gh_chars/Female Hair/Female Hair3.png",
+		"assets/gh_chars/Female Hand/Female Sword.png",
 	)
 
 	return {

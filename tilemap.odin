@@ -28,6 +28,7 @@ LayerType :: enum {
 
 MapLayer :: struct {
 	type:    LayerType,
+	name:    string,
 	chunks:  [dynamic]MapChunk,
 	objects: [dynamic]MapObject,
 }
@@ -129,6 +130,13 @@ findMapObject :: proc(m: TileMap, name: string) -> ^MapObject {
 		for &o in l.objects {
 			if o.name == name do return &o
 		}
+	}
+	return nil
+}
+
+findMapLayer :: proc(m: TileMap, name: string) -> ^MapLayer {
+	for &l in m.layers {
+		if l.name == name do return &l
 	}
 	return nil
 }

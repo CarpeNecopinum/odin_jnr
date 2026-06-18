@@ -3,6 +3,7 @@
 package main
 
 import "core:fmt"
+import "vendor:box2d"
 import "vendor:raylib"
 
 Camera :: struct {
@@ -15,6 +16,9 @@ GameState :: struct {
 	camera: Camera,
 }
 
+physicalizeWorld :: proc(m: TileMap, w: box2d.WorldId) {
+
+}
 
 main :: proc() {
 	raylib.SetConfigFlags({.VSYNC_HINT, .WINDOW_RESIZABLE})
@@ -30,6 +34,11 @@ main :: proc() {
 		p.pos.x = spawn.x - p.animations[.IDLE].frame_size.x / 2
 		p.pos.y = spawn.y - p.animations[.IDLE].frame_size.y
 	}
+
+	pworld_def := box2d.DefaultWorldDef()
+	pworld_def.gravity.y = 10
+	pworld := box2d.CreateWorld(pworld_def)
+	defer box2d.DestroyWorld(pworld)
 
 	for !raylib.WindowShouldClose() {
 		if raylib.IsWindowResized() {
