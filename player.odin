@@ -43,6 +43,7 @@ makePlayer :: proc() -> Character {
 
 	return {
 		{0, 0},
+		0.0,
 		tex,
 		.LEFT,
 		.IDLE,
@@ -50,33 +51,4 @@ makePlayer :: proc() -> Character {
 		0,
 		6,
 	}
-}
-
-updatePlayer :: proc(p: ^Character) {
-	p.frame_idx += 1
-
-	moved := false
-	if raylib.IsKeyDown(.LEFT) {
-		p.pos.x -= 2
-		p.facing = .LEFT
-		moved = true
-	} else if raylib.IsKeyDown(.RIGHT) {
-		p.pos.x += 2
-		p.facing = .RIGHT
-		moved = true
-	}
-
-	if moved {
-		p.state = .WALKING
-	} else {
-		p.state = .IDLE
-	}
-
-	// if raylib.IsKeyDown(.UP) {
-	// 	cam.origin.y -= 5
-	// } else if raylib.IsKeyDown(.DOWN) {
-	// 	cam.origin.y += 5
-	// }
-
-
 }
