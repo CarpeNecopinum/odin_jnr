@@ -19,8 +19,7 @@ makeDebugDraw :: proc(gs: ^GameState) -> box2d.DebugDraw {
 		c := (raylib.Color)(i32(color) << 2 | 0xff)
 		vtcs := [16][2]f32{}
 		for i in 0 ..< count {
-			global := box2d.TransformPoint(transform, vertices[i])
-			vtcs[i] = ([2]f32)(([2]i32)(global) * gs.camera.scale - gs.camera.origin)
+			vtcs[i] = box2d.TransformPoint(transform, vertices[i])
 		}
 		vtcs[count] = vtcs[0]
 		raylib.DrawLineStrip(&vtcs[0], count + 1, raylib.WHITE)

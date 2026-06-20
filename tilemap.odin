@@ -95,8 +95,8 @@ drawTileMap :: proc(m: TileMap, gs: GameState) {
 		return {f32(x), f32(y), f32(w), f32(h)}
 	}
 
-	shift := gs.camera.origin
-	scale := gs.camera.scale
+	// shift := gs.camera.origin
+	// scale := gs.camera.scale
 	for layer in m.layers {
 		if layer.type != .tilelayer do continue
 		for c in layer.chunks {
@@ -108,14 +108,14 @@ drawTileMap :: proc(m: TileMap, gs: GameState) {
 					i32(m.tilewidth) * (i % c.width) + (c.x * i32(m.tilewidth)),
 					i32(m.tileheight) * (i / c.width) + (c.y * i32(m.tileheight)),
 				}
-				pos *= scale
-				pos -= shift
+				// pos *= scale
+				// pos -= shift
 
 				tile := m.tiles[tile_idx]
 				raylib.DrawTexturePro(
 					tile.texture,
 					make_rect(tile.x, tile.y, m.tilewidth, m.tileheight),
-					make_rect(pos.x, pos.y, m.tilewidth * i16(scale), m.tileheight * i16(scale)),
+					make_rect(pos.x, pos.y, m.tilewidth, m.tileheight),
 					raylib.Vector2{},
 					0.0,
 					white,

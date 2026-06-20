@@ -20,8 +20,10 @@ drawTilingX :: proc(tex: raylib.Texture2D, x: i32, y: i32, width: i32, scale: i3
 drawBackground :: proc(bg: Background, state: GameState) {
 	for tex, idx in bg.layers {
 		parallax := 1.0 / f32(len(bg.layers) + 1 - idx)
-		parallaxed_shift := ([2]i32)(([2]f32)(-state.camera.origin) * parallax)
-		drawTilingX(tex, parallaxed_shift.x, parallaxed_shift.y, state.camera.size.x, bg.scale)
+		parallaxed_shift := ([2]i32)(
+			([2]f32)(-state.camera.target + state.camera.offset) * parallax,
+		)
+		drawTilingX(tex, parallaxed_shift.x, parallaxed_shift.y, 1920, bg.scale)
 	}
 }
 

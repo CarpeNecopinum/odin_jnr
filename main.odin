@@ -12,14 +12,14 @@ Camera :: struct {
 }
 
 GameState :: struct {
-	camera: Camera,
+	camera: raylib.Camera2D,
 }
 
 
 main :: proc() {
 	raylib.SetConfigFlags({.VSYNC_HINT, .WINDOW_RESIZABLE})
 	raylib.InitWindow(800, 600, "Odin J&N")
-	gs := GameState{{{800, 600}, {0, 0}, 2}}
+	gs := GameState{raylib.Camera2D{{400, 300}, {}, 0.0, 1.0}}
 
 	bg := loadDefaultBackground()
 
@@ -37,11 +37,12 @@ main :: proc() {
 	dd := makeDebugDraw(&gs)
 
 	for !raylib.WindowShouldClose() {
+
 		if raylib.IsWindowResized() {
-			new_size := [2]i32{raylib.GetRenderWidth(), raylib.GetRenderHeight()}
-			delta := new_size - gs.camera.size
-			gs.camera.size = new_size
-			gs.camera.origin -= delta / 2
+			gs.camera.offset = [2]f32 {
+				f32(raylib.GetRenderWidth()) / 2.0,
+				f32(raylib.GetRenderHeight()) / 2.0,
+			}
 		}
 
 		raylib.PollInputEvents()
@@ -54,13 +55,15 @@ main :: proc() {
 
 		raylib.BeginDrawing()
 		drawBackground(bg, gs)
+		raylib.BeginMode2D(gs.camera)
 		drawTileMap(game_map, gs)
 
 		drawCharacter(p, gs)
 
-		raylib.DrawCircle(1, 1, 1.0, raylib.WHITE)
+		raylib.DrawCircle(1, 1, 1.0, raylib.WHITE) // somehow, debug rendering only works when we've drawn a circle before it
 		box2d.World_Draw(pworld, &dd)
 
+		raylib.EndMode2D()
 		raylib.EndDrawing()
 	}
 	raylib.CloseWindow()
