@@ -5,6 +5,7 @@ import "core:fmt"
 import "core:os"
 import "core:path/filepath"
 import "core:strings"
+import "vendor:box2d"
 import "vendor:raylib"
 
 MapChunk :: struct {
@@ -139,4 +140,30 @@ findMapLayer :: proc(m: TileMap, name: string) -> ^MapLayer {
 		if l.name == name do return &l
 	}
 	return nil
+}
+
+physicalizeWorld :: proc(m: TileMap, w: box2d.WorldId) -> box2d.BodyId {
+	layer := findMapLayer(m, "Physical")
+	bodyDef := box2d.DefaultBodyDef()
+	bodyDef.type = .staticBody
+	bodyId := box2d.CreateBody(w, bodyDef)
+
+	halfWidth, halfHeight := f32(m.tilewidth / 2), f32(m.tileheight / 2)
+	shapeDef := box2d.DefaultShapeDef()
+	for c in layer.chunks {
+		for row in 0 ..< c.height {
+			for col in 0 ..< c.width {
+				idx := col + row * c.width
+				if c.data[idx] == 0 do continue
+
+				center := [2]f32 {
+					f32((col + c.x) * i32(m.tilewidth)) + halfWidth,
+					f32((row + c.y) * i32(m.tileheight)) + halfHeight,
+				}
+				box := box2d.MakeOffsetBox(halfWidth, halfHeight, center, box2d.Rot_identity)
+				_ = box2d.CreatePolygonShape(bodyId, shapeDef, box)
+			}
+		}
+	}
+	return bodyId
 }

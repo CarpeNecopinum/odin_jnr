@@ -1,6 +1,9 @@
 package main
 
+import "core:fmt"
+import "core:math"
 import "core:strings"
+import "vendor:box2d"
 import "vendor:raylib"
 import "vendor:raylib/rlgl"
 
@@ -51,4 +54,69 @@ makePlayer :: proc() -> Character {
 		0,
 		6,
 	}
+}
+
+
+applyInputForces :: proc(pb: box2d.BodyId) {
+	force := [2]f32{}
+
+	mass := box2d.Body_GetMass(pb)
+	if raylib.IsKeyDown(.LEFT) {
+		force.x = -200 * mass
+	} else if raylib.IsKeyDown(.RIGHT) {
+		force.x = 200 * mass
+	}
+
+	vel := box2d.Body_GetLinearVelocity(pb)
+	if raylib.IsKeyDown(.UP) && math.abs(vel.y) < 10 {
+		fmt.println("Jumped")
+		box2d.Body_ApplyLinearImpulseToCenter(pb, {0.0, -200.0 * mass}, true)
+	}
+
+	box2d.Body_ApplyForceToCenter(pb, force, true)
+
+	torque_factor := 9000 * mass
+	rot := box2d.Body_GetRotation(pb)
+	box2d.Body_ApplyTorque(pb, -torque_factor * box2d.Rot_GetAngle(rot), true)
+}
+updatePlayer :: proc(p: ^Character, pb: box2d.BodyId) {
+	p.frame_idx += 1
+
+	frame_size := p.animations[.IDLE].frame_size
+	p.pos = ([2]i32)(box2d.Body_GetPosition(pb)) - frame_size / 2
+	rot := box2d.Body_GetRotation(pb)
+	p.rot = math.atan2(rot.s, rot.c)
+
+	vel := box2d.Body_GetLinearVelocity(pb)
+	if vel.x > 10 {
+		p.facing = .RIGHT
+		p.state = .WALKING
+	} else if vel.x < -10 {
+		p.facing = .LEFT
+		p.state = .WALKING
+	} else {
+		p.state = .IDLE
+	}
+}
+
+
+makePlayerBody :: proc(w: box2d.WorldId, p: Character) -> box2d.BodyId {
+	frame_size := p.animations[.IDLE].frame_size
+	bodyDef := box2d.DefaultBodyDef()
+	bodyDef.type = .dynamicBody
+	bodyDef.position.x = f32(p.pos.x + frame_size.x / 2)
+	bodyDef.position.y = f32(p.pos.y + frame_size.y / 3)
+	bodyId := box2d.CreateBody(w, bodyDef)
+
+	box := box2d.MakeOffsetBox(
+		f32(frame_size.x / 8),
+		f32(frame_size.y / 3),
+		([2]f32){0, f32(frame_size.y / 6)},
+		box2d.Rot_identity,
+	)
+	shapeDef := box2d.DefaultShapeDef()
+	shapeDef.material.friction = 0.1
+	_ = box2d.CreatePolygonShape(bodyId, shapeDef, box)
+
+	return bodyId
 }

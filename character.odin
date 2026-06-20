@@ -25,3 +25,8 @@ focusCharacter :: proc(c: ^Camera, p: Character) {
 	goal := (p.pos * c.scale) - c.size / 2 + p.animations[.IDLE].frame_size * c.scale / 2
 	c.origin = ii(0.9 * ff(c.origin) + 0.1 * ff(goal))
 }
+
+moveCharacterToObject :: proc(p: ^Character, o: MapObject) {
+	p.pos.x = o.x - p.animations[.IDLE].frame_size.x / 2
+	p.pos.y = o.y - p.animations[.IDLE].frame_size.y
+}
