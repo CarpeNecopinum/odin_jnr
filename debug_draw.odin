@@ -23,12 +23,7 @@ makeDebugDraw :: proc(gs: ^GameState) -> box2d.DebugDraw {
 			vtcs[i] = ([2]f32)(([2]i32)(global) * gs.camera.scale - gs.camera.origin)
 		}
 		vtcs[count] = vtcs[0]
-		// raylib.DrawCircle(i32(vtcs[0].x), i32(vtcs[0].y), 10, raylib.WHITE)
 		raylib.DrawLineStrip(&vtcs[0], count + 1, raylib.WHITE)
-		{
-			context = runtime.default_context()
-			fmt.println(vtcs[0], count)
-		}
 	}
 	dd.drawShapes = true
 	dd.userContext = gs
