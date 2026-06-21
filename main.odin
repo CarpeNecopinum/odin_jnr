@@ -2,6 +2,7 @@
 
 package main
 
+import "core:fmt"
 import "vendor:box2d"
 import "vendor:raylib"
 
@@ -15,6 +16,13 @@ GameState :: struct {
 	camera: raylib.Camera2D,
 }
 
+controlCamera :: proc(c: ^raylib.Camera2D) {
+	if raylib.IsKeyDown(.KP_ADD) {
+		c.zoom *= 1.1
+	} else if raylib.IsKeyDown(.KP_SUBTRACT) {
+		c.zoom /= 1.1
+	}
+}
 
 main :: proc() {
 	raylib.SetConfigFlags({.VSYNC_HINT, .WINDOW_RESIZABLE})
@@ -47,6 +55,7 @@ main :: proc() {
 
 		raylib.PollInputEvents()
 
+		controlCamera(&gs.camera)
 		applyInputForces(pbody)
 		box2d.World_Step(pworld, 1 / 60.0, 4)
 

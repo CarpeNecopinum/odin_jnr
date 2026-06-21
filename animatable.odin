@@ -32,13 +32,7 @@ drawAnimatable :: proc($T: typeid, p: Animatable(T), gs: GameState) {
 	frame_idx := (p.frame_idx / p.frame_divisor) % anim.num_frames
 	src_pos := [2]i32{frame_idx * anim.frame_size.x, anim.y}
 	src := make_rect(src_pos, anim.frame_size)
-	dst := make_rect(
-		anim.frame_size / 2 - p.pos,
-		//p.pos,
-		anim.frame_size,
-		// (p.pos + anim.frame_size / 2) * gs.camera.scale - gs.camera.origin,
-		// anim.frame_size * gs.camera.scale,
-	)
+	dst := make_rect(p.pos + anim.frame_size / 2, anim.frame_size)
 	if p.facing == .RIGHT {
 		src.width = -src.width
 	}
@@ -47,9 +41,7 @@ drawAnimatable :: proc($T: typeid, p: Animatable(T), gs: GameState) {
 		p.texture,
 		src,
 		dst,
-		{},
-		// ([2]f32)(p.pos),
-		// ([2]f32)(anim.frame_size / 2 * gs.camera.scale),
+		([2]f32)(anim.frame_size / 2),
 		math.to_degrees(p.rot),
 		raylib.Color{255, 255, 255, 255},
 	)
